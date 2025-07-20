@@ -43,7 +43,8 @@ class TareaResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('titulo')
-                    ->searchable(),
+                    ->searchable()
+                    ->color(fn (Tarea $record): ?string => !$record->completada ? 'danger' : null),
                 Tables\Columns\IconColumn::make('completada')
                     ->boolean(),
             ])
