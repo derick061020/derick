@@ -25,9 +25,11 @@ class TareaResource extends Resource
             ->schema([
                 Forms\Components\TextInput::make('titulo')
                     ->required()
+                    ->columnSpanFull()
                     ->maxLength(255),
                 Forms\Components\Textarea::make('descripcion')
-                    ->nullable(),
+                    ->nullable()
+                    ->columnSpanFull(),
                 Forms\Components\Toggle::make('completada')
                     ->required(),
                 Forms\Components\DatePicker::make('fecha_limite')
@@ -42,28 +44,45 @@ class TareaResource extends Resource
             ->columns([
                 Tables\Columns\TextColumn::make('titulo')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('descripcion')
-                    ->limit(50),
                 Tables\Columns\IconColumn::make('completada')
                     ->boolean(),
-                Tables\Columns\TextColumn::make('fecha_limite')
-                    ->date('d/m/Y'),
-                Tables\Columns\TextColumn::make('created_at')
-                    ->dateTime('d/m/Y H:i'),
-                Tables\Columns\TextColumn::make('updated_at')
-                    ->dateTime('d/m/Y H:i'),
             ])
             ->filters([
                 //
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
+                Tables\Actions\Action::make('completar')
+                    ->action(function (Tarea $record) {
+                        $record->completada = true;
+                        $record->save();
+                    })
+                    ->icon('heroicon-o-check-circle')
+                    ->color('success')
+                    ->requiresConfirmation()
+                    ->modalHeading('Marcar como completada')
+                    ->modalDescription('¿Estás seguro de que quieres marcar esta tarea como completada?')
+                    ->modalButton('Marcar como completada')
+                    ->visible(function (Tarea $record) {
+                        return !$record->completada;
+                    }),
+
+                Tables\Actions\Action::make('desmarcar')
+                    ->action(function (Tarea $record) {
+                        $record->completada = false;
+                        $record->save();
+                    })
+                    ->icon('heroicon-o-x-circle')
+                    ->color('danger')
+                    ->requiresConfirmation()
+                    ->modalHeading('Desmarcar como completada')
+                    ->modalDescription('¿Estás seguro de que quieres desmarcar esta tarea como completada?')
+                    ->modalButton('Desmarcar')
+                    ->visible(function (Tarea $record) {
+                        return $record->completada;
+                    }),
             ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
-                ]),
-            ]);
+            ->bulkActions([])
+            ->defaultSort('completada', 'asc');
     }
 
     public static function getRelations(): array

@@ -12,4 +12,7 @@ class Tarea extends Model
         'completada',
         'fecha_limite',
     ];
+    protected $casts = [
+        'completada' => 'boolean',
+    ];
 }
